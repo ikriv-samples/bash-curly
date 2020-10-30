@@ -3,6 +3,7 @@
 import sys
 from enum import Enum
 from dataclasses import dataclass
+from itertools import zip_longest, islice
 
 class TokenKind(Enum):
   LEFT_BRACE = 0
@@ -77,8 +78,9 @@ class Literal:
 class Span:
   def __init__(self, nodes):
     self.nodes = nodes
-    for i in range(len(nodes)):
-      nodes[i].set_next( nodes[i+1] if i+1<len(nodes) else None )
+	# iterate over pairs of adjacent nodes
+    for node,next in zip_longest(nodes, islice(iter(nodes),1,None)):
+      node.set_next(next)
       
   def set_next(self, node):
     if self.nodes:
