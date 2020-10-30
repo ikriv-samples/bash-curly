@@ -39,7 +39,7 @@ class Tokenizer:
     return None
     
   def next_token(self) -> Token:
-    if (self.pos >= len(self.s)):
+    if self.pos >= len(self.s):
       return Token(TokenKind.END, "")
        
     initial_pos = self.pos
