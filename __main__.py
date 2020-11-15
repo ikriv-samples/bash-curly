@@ -3,7 +3,7 @@
 import sys
 from enum import Enum
 from dataclasses import dataclass
-from itertools import zip_longest, islice
+from itertools import chain, islice, zip_longest
 
 class TokenKind(Enum):
   LEFT_BRACE = 0
@@ -54,11 +54,12 @@ class Tokenizer:
     self.pos += 1
     return token
 
-def output_node(node, output_func, prefix):
+def strings(node, prefix):
   if node is None:
-    output_func(prefix)
+    yield prefix
   else:
-    node.output(output_func, prefix)
+    for s in node.strings(prefix):
+      yield s
     
 class Literal:
   def __init__(self, value):
@@ -67,8 +68,8 @@ class Literal:
   def set_next(self, node):
     self.next = node
     
-  def output(self, output_func, prefix):
-    output_node(self.next, output_func, prefix+self.value)
+  def strings(self, prefix):
+    return strings(self.next, prefix+self.value)
     
   def __str__(self):
     return f"'{self.value}'"
@@ -87,9 +88,9 @@ class Span:
     else:
       self.next = node
       
-  def output(self, output_func, prefix):
+  def strings(self, prefix):
     to_print = self.nodes[0] if self.nodes else self.next
-    output_node(to_print, output_func, prefix)
+    return strings(to_print, prefix)
         
   def __str__(self):
     return ",".join(str(node) for node in self.nodes)
@@ -106,12 +107,13 @@ class Variant:
     else:
       self.next = node
 
-  def output(self, output_func, prefix):
+  def strings(self, prefix):
     if self.nodes:
       for node in self.nodes:
-        output_node(node, output_func, prefix)
+        for s in strings(node, prefix):
+          yield s
     else:
-      output_node(self.next, output_func, prefix)
+      return strings(self.next, prefix)
       
   def __str__(self):
     return "(" + "|".join(str(node) for node in self.nodes) + ")"
@@ -151,10 +153,11 @@ def parse(s):
     print(f"Unexpected token '{token.value}', parsing terminated")
   return result
   
-def process_expression(output_func, s):
-  output_node(parse(s), output_func, "")
+def process_expression(s):
+  return strings(parse(s), "")
 
 if __name__ == "__main__":
   for line in sys.stdin:
-    process_expression(print, line)
+    for s in process_expression(line):
+      print(s)
   
