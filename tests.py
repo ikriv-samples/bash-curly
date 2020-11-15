@@ -4,6 +4,7 @@ from myparser import process_expression
 class TestProcessExpression(unittest.TestCase):
     def test_parser(self):
         test_data = {
+            "": {""},
             "abc": {"abc"},
             "{foo,bar}": {"foo", "bar"},
             "a{b,c}d": {"abd", "acd"},

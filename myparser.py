@@ -154,4 +154,7 @@ def parse(s):
   return result
   
 def process_expression(s):
-  return strings(parse(s), "")
+  if s:
+    return strings(parse(s), "")
+  else:
+    return [""]
