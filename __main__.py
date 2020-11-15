@@ -54,11 +54,11 @@ class Tokenizer:
     self.pos += 1
     return token
 
-def print_node(node, prefix):
+def output_node(node, output_func, prefix):
   if node is None:
-    print(prefix)
+    output_func(prefix)
   else:
-    node.print(prefix)
+    node.output(output_func, prefix)
     
 class Literal:
   def __init__(self, value):
@@ -67,9 +67,8 @@ class Literal:
   def set_next(self, node):
     self.next = node
     
-  def print(self, prefix):
-
-    print_node(self.next, prefix+self.value)
+  def output(self, output_func, prefix):
+    output_node(self.next, output_func, prefix+self.value)
     
   def __str__(self):
     return f"'{self.value}'"
@@ -78,7 +77,7 @@ class Literal:
 class Span:
   def __init__(self, nodes):
     self.nodes = nodes
-	# iterate over pairs of adjacent nodes
+	  # iterate over pairs of adjacent nodes
     for node,next in zip_longest(nodes, islice(iter(nodes),1,None)):
       node.set_next(next)
       
@@ -88,9 +87,9 @@ class Span:
     else:
       self.next = node
       
-  def print(self, prefix):
+  def output(self, output_func, prefix):
     to_print = self.nodes[0] if self.nodes else self.next
-    print_node(to_print, prefix)
+    output_node(to_print, output_func, prefix)
         
   def __str__(self):
     return ",".join(str(node) for node in self.nodes)
@@ -107,12 +106,12 @@ class Variant:
     else:
       self.next = node
 
-  def print(self, prefix):
+  def output(self, output_func, prefix):
     if self.nodes:
       for node in self.nodes:
-        print_node(node, prefix)
+        output_node(node, output_func, prefix)
     else:
-      print_node(self.next, prefix)
+      output_node(self.next, output_func, prefix)
       
   def __str__(self):
     return "(" + "|".join(str(node) for node in self.nodes) + ")"
@@ -152,9 +151,10 @@ def parse(s):
     print(f"Unexpected token '{token.value}', parsing terminated")
   return result
   
-def process_expression(s):
-  print_node(parse(s), "")
+def process_expression(output_func, s):
+  output_node(parse(s), output_func, "")
 
-for line in sys.stdin:
-  process_expression(line)
+if __name__ == "__main__":
+  for line in sys.stdin:
+    process_expression(print, line)
   
