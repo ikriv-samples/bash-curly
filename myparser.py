@@ -54,41 +54,41 @@ class Tokenizer:
     self.pos += 1
     return token
 
-def strings(node, prefix):
-  if node is None:
-    yield prefix
-  else:
-    for s in node.strings(prefix):
-      yield s
     
+class Empty:
+  class _EmptyNode:
+    def strings(self, prefix):
+      yield prefix
+  node = _EmptyNode()
+
 class Literal:
   def __init__(self, value):
     self.value = value
-    self._next = None
+    self._next = Empty.node
 
   def set_next(self, next):
     self._next = next
     
   def strings(self, prefix):
-    return strings(self._next, prefix+self.value)
+    return self._next.strings(prefix+self.value)
     
 
 class Span:
   def __init__(self):
-    self._first = self._last = None
+    self._first = self._last = Empty.node
 
   def append(self, node):
-    if self._last:
+    if self._last == Empty.node:
+      self._first = self._last = node
+    else:
       self._last.set_next(node)
       self._last = node
-    else:
-      self._first = self._last = node
       
   def set_next(self, node):
     self._last.set_next(node)
       
   def strings(self, prefix):
-    return strings(self._first, prefix)
+    return self._first.strings(prefix)
 
 class Variant:
   def __init__(self, nodes):
@@ -100,7 +100,7 @@ class Variant:
 
   def strings(self, prefix):
     for node in self.nodes:
-      for s in strings(node, prefix):
+      for s in node.strings(prefix):
         yield s
       
 def parse_span(tokenizer):
@@ -139,6 +139,6 @@ def parse(s):
   
 def process_expression(s):
   if s:
-    return strings(parse(s), "")
+    return parse(s).strings("")
   else:
     return [""]
