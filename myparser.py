@@ -64,6 +64,7 @@ def strings(node, prefix):
 class Literal:
   def __init__(self, value):
     self.value = value
+    self.next = None
     
   def set_next(self, node):
     self.next = node
@@ -76,25 +77,21 @@ class Literal:
     
 
 class Span:
-  def __init__(self, nodes):
-    self.nodes = nodes
-	  # iterate over pairs of adjacent nodes
-    for node,next in zip_longest(nodes, islice(iter(nodes),1,None)):
-      node.set_next(next)
+  def __init__(self):
+    self._first = self._last = None
+
+  def append(self, node):
+    if self._last:
+      self._last.set_next(node)
+      self._last = node
+    else:
+      self._first = self._last = node
       
   def set_next(self, node):
-    if self.nodes:
-      self.nodes[-1].set_next(node)
-    else:
-      self.next = node
+    self._last.set_next(node)
       
   def strings(self, prefix):
-    to_print = self.nodes[0] if self.nodes else self.next
-    return strings(to_print, prefix)
-        
-  def __str__(self):
-    return ",".join(str(node) for node in self.nodes)
-
+    return strings(self._first, prefix)
 
 class Variant:
   def __init__(self, nodes):
@@ -120,15 +117,15 @@ class Variant:
       
 
 def parse_span(tokenizer):
-  nodes = []
+  span = Span()
   while True:
      token = tokenizer.next_token()
      if token.kind == TokenKind.LITERAL:
-       nodes.append(Literal(token.value))
+       span.append(Literal(token.value))
      elif token.kind == TokenKind.LEFT_BRACE:
-       nodes.append(parse_variant(tokenizer))
+       span.append(parse_variant(tokenizer))
      else:
-       return Span(nodes), token
+       return span, token
        
 def parse_variant(tokenizer):
   nodes = []
