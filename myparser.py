@@ -64,16 +64,13 @@ def strings(node, prefix):
 class Literal:
   def __init__(self, value):
     self.value = value
-    self.next = None
-    
-  def set_next(self, node):
-    self.next = node
+    self._next = None
+
+  def set_next(self, next):
+    self._next = next
     
   def strings(self, prefix):
-    return strings(self.next, prefix+self.value)
-    
-  def __str__(self):
-    return f"'{self.value}'"
+    return strings(self._next, prefix+self.value)
     
 
 class Span:
@@ -98,24 +95,14 @@ class Variant:
     self.nodes = nodes
     
   def set_next(self, next):
-    if self.nodes:
-      for node in self.nodes:
-        node.set_next(next)
-    else:
-      self.next = node
+    for node in self.nodes:
+      node.set_next(next)
 
   def strings(self, prefix):
-    if self.nodes:
-      for node in self.nodes:
-        for s in strings(node, prefix):
-          yield s
-    else:
-      return strings(self.next, prefix)
+    for node in self.nodes:
+      for s in strings(node, prefix):
+        yield s
       
-  def __str__(self):
-    return "(" + "|".join(str(node) for node in self.nodes) + ")"
-      
-
 def parse_span(tokenizer):
   span = Span()
   while True:
