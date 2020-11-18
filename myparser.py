@@ -59,6 +59,8 @@ class Empty:
   class _EmptyNode:
     def strings(self, prefix):
       yield prefix
+    def __bool__(self):
+      return False
   node = _EmptyNode()
 
 class Literal:
@@ -78,11 +80,11 @@ class Span:
     self._first = self._last = Empty.node
 
   def append(self, node):
-    if self._last == Empty.node:
-      self._first = self._last = node
-    else:
+    if self._last:
       self._last.set_next(node)
       self._last = node
+    else:
+      self._first = self._last = node
       
   def set_next(self, node):
     self._last.set_next(node)
