@@ -127,16 +127,16 @@ def parse_variant(tokenizer):
     if token.kind != TokenKind.RIGHT_BRACE:
       # it's an error; variant should end with a right brace
       if token.kind == TokenKind.END:
-        print("Missing right brace at the end of string", file=sys.stderr)
+        raise ValueError("Missing right brace at the end of string")
       else:
-        print(f"Unexpected token '{token.value}'", file=sys.stderr)
+        raise ValueError(f"Unexpected token '{token.value}'")
 
     return Variant(nodes)
   
 def parse(s):
   result, token = parse_span(Tokenizer(s))
   if token.kind != TokenKind.END:
-    print(f"Unexpected token '{token.value}', parsing terminated")
+    raise ValueError(f"Unexpected token '{token.value}', parsing terminated")
   return result
   
 def process_expression(s):
