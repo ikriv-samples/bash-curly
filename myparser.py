@@ -79,6 +79,9 @@ class Span:
   def __init__(self):
     self._first = self._last = Empty.node
 
+  def __bool__(self):
+    return bool(self._first)
+
   def append(self, node):
     if self._last:
       self._last.set_next(node)
@@ -114,6 +117,8 @@ def parse_span(tokenizer):
      elif token.kind == TokenKind.LEFT_BRACE:
        span.append(parse_variant(tokenizer))
      else:
+       if not span:
+         raise ValueError("Empty span is not allowed")
        return span, token
        
 def parse_variant(tokenizer):

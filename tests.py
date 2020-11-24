@@ -18,7 +18,6 @@ class TestProcessExpression(unittest.TestCase):
             "{a,b}{c,d}": ["ac", "bc", "ad", "bd"],
             "a{b,{c,d}e}": ["ab", "ace", "ade"],
             "{a,b}{{c,d}{e,f}}": ["ace", "acf", "ade", "adf", "bce", "bcf", "bde", "bdf"],
-
             "{a,b,c}": ["a","b","c"],
             "a{b,c}": ["ab", "ac"],
             "{a}": ["a"],
@@ -28,10 +27,10 @@ class TestProcessExpression(unittest.TestCase):
             "}abc": Exception,
             "{abc": Exception,
             "}[": Exception,
-            "{}": [""],
+            "{}": Exception,
             "a,b,c": Exception,
             "{a{b,c}": Exception,
-            "{a,}": ["", "a"],
+            "{a,}": Exception,
             "{a,a}": ["a", "a"],
             "{a,ab}{c,bc}": ["ac", "abc", "abc", "abbc"]
         }
